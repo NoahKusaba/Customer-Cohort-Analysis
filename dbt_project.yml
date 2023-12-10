@@ -23,12 +23,20 @@ clean-targets:         # directories to be removed by `dbt clean`
   - "target"
   - "dbt_packages"
 
-
 models:
-  new_stackless:
-    # Config indicated by + and applies to all files under models/example/
-    example:
-      +materialized: view
+
+  STACKLESS.pivot_source:
+    materialized: table
+
+  STACKLESS.generate_pivot: 
+    materialized: view
+    # depends_on:  STACKLESS.pivot_source
+
+# models:
+#   new_stackless:
+#     # Config indicated by + and applies to all files under models/example/
+#     example:
+#       +materialized: view
 vars:
   initial_period_start: '{{ env_var("COHORT_INITIAL_PERIOD_START") }}'
   period_size: '{{ env_var("COHORT_PERIOD_SIZE") }}'
