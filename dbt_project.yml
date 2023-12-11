@@ -34,6 +34,7 @@ models:
 
 
 #  INITIAL_PERIOD_START IN FOMRAT 'YYYY-MM-DD'
+# Period size format: '12' for monthly, '3' for quarterly 
 vars:
   initial_period_start: '{{ env_var("COHORT_INITIAL_PERIOD_START") }}'
   period_size: '{{ env_var("COHORT_PERIOD_SIZE") }}'

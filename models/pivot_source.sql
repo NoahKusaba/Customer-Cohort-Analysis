@@ -4,7 +4,7 @@ WITH cohort_data AS (
   *
   FROM 
   STACKLESS.ONLINE_RETAIL_II
-  WHERE INVOICEDATE <= '{{ var('initial_period_start') }}'
+  WHERE INVOICEDATE >= '{{ var('initial_period_start') }}'
 ),  
 -- Data Cleaning 
 quantity_unit_price as  (

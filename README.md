@@ -1,15 +1,24 @@
-Welcome to your new dbt project!
+### Creating A Dynamic Customer Cohort Model for Sales Analytics 
 
-### Using the starter project
+# What is a Cohort Table?
+(https://www.youtube.com/watch?v=hWomCwhMWe0&t=4s)
 
-Try running the following commands:
-- dbt run
-- dbt test
+A customer retention cohort table tracks customers from their first purchase Month (Period Size),
+and tracks if they remain as a customer accross subsequent period time steps. 
+
+# How to Run:
+- Check the myscript.sh file for commands needed to run this project. 
+# Features
+- Dynamically generates pivot Table, which can infer index from table
+- Dynamically accepts start date at run time. 
+
+# Technologies
+- DBT
+- Snowflake
 
 
-### Resources:
-- Learn more about dbt [in the docs](https://docs.getdbt.com/docs/introduction)
-- Check out [Discourse](https://discourse.getdbt.com/) for commonly asked questions and answers
-- Join the [chat](https://community.getdbt.com/) on Slack for live discussions and support
-- Find [dbt events](https://events.getdbt.com) near you
-- Check out [the blog](https://blog.getdbt.com/) for the latest news on dbt's development and best practices
+# Will feature:
+- Dynamically accepts Period Size for tables
+- Fix Model Order Run. 
+- 
+
