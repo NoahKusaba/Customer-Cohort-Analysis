@@ -16,3 +16,4 @@ select * from {{my_table}}
 ORDER BY COHORT_DATE DESC
 
 
+

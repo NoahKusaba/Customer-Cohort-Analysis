@@ -32,12 +32,8 @@ models:
     materialized: view
     # depends_on:  STACKLESS.pivot_source
 
-# models:
-#   new_stackless:
-#     # Config indicated by + and applies to all files under models/example/
-#     example:
-#       +materialized: view
+
+#  INITIAL_PERIOD_START IN FOMRAT 'YYYY-MM-DD'
 vars:
   initial_period_start: '{{ env_var("COHORT_INITIAL_PERIOD_START") }}'
   period_size: '{{ env_var("COHORT_PERIOD_SIZE") }}'
-  time_grain: '{{ env_var("COHORT_TIME_GRAIN") }}'

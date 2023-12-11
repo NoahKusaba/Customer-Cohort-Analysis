@@ -1,13 +1,12 @@
-
-
+-- Filters by Start Date
 WITH cohort_data AS (
   SELECT
   *
   FROM 
   STACKLESS.ONLINE_RETAIL_II
-
+  WHERE INVOICEDATE <= '{{ var('initial_period_start') }}'
 ),  
-
+-- Data Cleaning 
 quantity_unit_price as  (
   SELECT * FROM cohort_data
   where QUANTITY > 0 and PRICE > 0 and CUSTOMER_ID IS not NUll
@@ -23,6 +22,7 @@ cleaned_data as (
 select *  from dedup_data where dup = 1
 ),
 
+-- Split by Period Size 
 customer_firstPurchase AS (
   select CUSTOMER_ID, 
   min(INVOICEDATE) AS FIRST_PURCHASE,
@@ -42,7 +42,9 @@ CUSTOMER_PURCHASE_PER_COHORT AS (
     left join customer_firstPurchase as c 
       on m.CUSTOMER_ID = c.CUSTOMER_ID
 
-), COHORT_INDEXES AS (
+), 
+-- Create Cohort Index 
+COHORT_INDEXES AS (
   select mm.*, 
         (year_diff * 12 + month_diff + 1 ) as cohort_index
         from
