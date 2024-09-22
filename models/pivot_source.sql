@@ -13,7 +13,6 @@ quantity_unit_price as  (
 ),  
 
 dedup_data as (
-
   select * , ROW_NUMBER() OVER(PARTITION BY STOCKCODE, INVOICE, QUANTITY order by INVOICEDATE) as dup
   from quantity_unit_price
 ), 
@@ -41,24 +40,23 @@ CUSTOMER_PURCHASE_PER_COHORT AS (
     from cleaned_data as m
     left join customer_firstPurchase as c 
       on m.CUSTOMER_ID = c.CUSTOMER_ID
-
 ), 
+
 -- Create Cohort Index 
 COHORT_INDEXES AS (
-  select mm.*, 
-        (year_diff * 12 + month_diff + 1 ) as cohort_index
+  select 
+    *, 
+    (year_diff * 12 + month_diff + 1 ) as cohort_index
         from
   (SELECT *, 
   (invoice_year - cohort_year) as year_diff, 
   (invoice_month - cohort_month) as month_diff 
   FROM CUSTOMER_PURCHASE_PER_COHORT) as mm
-),  PIVOT_TABLE as ( 
+)
 
-    select distinct 
-      CUSTOMER_ID,
-      COHORT_DATE,
-      COHORT_INDEX 
-      FROM COHORT_INDEXES
-
-) 
-select * from PIVOT_TABLE
+SELECT DISTINCT
+    CUSTOMER_ID,
+    COHORT_DATE,
+    COHORT_INDEX
+FROM COHORT_INDEXES
+ORDER BY COHORT_DATE, COHORT_INDEX, CUSTOMER_ID
