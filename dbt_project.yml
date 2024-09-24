@@ -2,12 +2,12 @@
 # Name your project! Project names should contain only lowercase characters
 # and underscores. A good package name should reflect your organization"s
 # name or the intended use of these models
-name: "new_stackless"
+name: "customer_cohort_analysis"
 version: "1.0.0"
 config-version: 2
 
 # This setting configures which "profile" dbt uses for this project.
-profile: "new_stackless"
+profile: "pivot_table_project"
 
 # These configurations specify where dbt should look for different types of files.
 # The `model-paths` config, for example, states that models in this project can be
@@ -25,13 +25,11 @@ clean-targets:         # directories to be removed by `dbt clean`
 
 models:
 
-  STACKLESS.pivot_source:
+  project_schema.pivot_source:
     materialized: table
 
-  STACKLESS.generate_pivot: 
+  project_schema.generate_pivot: 
     materialized: view
-    # depends_on:  STACKLESS.pivot_source
-
 
 #  INITIAL_PERIOD_START IN FOMRAT 'YYYY-MM-DD'
 # Period size format: '12' for monthly, '3' for quarterly 

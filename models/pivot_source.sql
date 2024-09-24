@@ -1,62 +1,66 @@
--- Filters by Start Date
+-- Filter by start date
 WITH cohort_data AS (
-  SELECT
-  *
-  FROM 
-  STACKLESS.ONLINE_RETAIL_II
-  WHERE INVOICEDATE >= '{{ var('initial_period_start') }}'
-),  
--- Data Cleaning 
-quantity_unit_price as  (
-  SELECT * FROM cohort_data
-  where QUANTITY > 0 and PRICE > 0 and CUSTOMER_ID IS not NUll
-),  
-
-dedup_data as (
-  select * , ROW_NUMBER() OVER(PARTITION BY STOCKCODE, INVOICE, QUANTITY order by INVOICEDATE) as dup
-  from quantity_unit_price
-), 
-
-cleaned_data as ( 
-select *  from dedup_data where dup = 1
+  SELECT *
+  FROM project_schema.online_retail_ii
+  WHERE invoicedate >= '{{ var('initial_period_start') }}'
 ),
 
--- Split by Period Size 
-customer_firstPurchase AS (
-  select CUSTOMER_ID, 
-  min(INVOICEDATE) AS FIRST_PURCHASE,
-  DATEFROMPARTS(YEAR(MIN(INVOICEdATE)), MONTH(MIN(INVOICEDATE)), 1) AS COHORT_DATE
+-- Data cleaning
+cleaned_data AS (
+  SELECT DISTINCT
+    stockcode,
+    invoice,
+    customer_id,
+    invoicedate,
+    quantity,
+    price,
+    ROW_NUMBER() OVER (PARTITION BY stockcode, invoice, quantity ORDER BY invoicedate) AS dup
+  FROM cohort_data
+  WHERE quantity > 0 AND price > 0 AND customer_id IS NOT NULL
+),
+
+deduplicated_data AS (
+  SELECT *
   FROM cleaned_data
-  GROUP BY CUSTOMER_ID
-) ,
-CUSTOMER_PURCHASE_PER_COHORT AS (
+  WHERE dup = 1
+),
 
-  select  m.*, 
-          c.COHORT_DATE,
-					year(m.InvoiceDate) invoice_year,
-					month(m.InvoiceDate) invoice_month,
-					year(c.Cohort_Date) cohort_year,
-					month(c.Cohort_Date) cohort_month
-    from cleaned_data as m
-    left join customer_firstPurchase as c 
-      on m.CUSTOMER_ID = c.CUSTOMER_ID
-), 
+-- First purchase per customer (cohort date calculation)
+customer_first_purchase AS (
+  SELECT 
+    customer_id, 
+    MIN(invoicedate) AS first_purchase,
+    DATEFROMPARTS(YEAR(MIN(invoicedate)), MONTH(MIN(invoicedate)), 1) AS cohort_date
+  FROM deduplicated_data
+  GROUP BY customer_id
+),
 
--- Create Cohort Index 
-COHORT_INDEXES AS (
-  select 
-    *, 
-    (year_diff * 12 + month_diff + 1 ) as cohort_index
-        from
-  (SELECT *, 
-  (invoice_year - cohort_year) as year_diff, 
-  (invoice_month - cohort_month) as month_diff 
-  FROM CUSTOMER_PURCHASE_PER_COHORT) as mm
+-- Add customer cohort data to each purchase
+customer_purchase_per_cohort AS (
+  SELECT 
+    d.*,
+    c.cohort_date,
+    YEAR(d.invoicedate) AS invoice_year,
+    MONTH(d.invoicedate) AS invoice_month,
+    YEAR(c.cohort_date) AS cohort_year,
+    MONTH(c.cohort_date) AS cohort_month
+  FROM deduplicated_data d
+  LEFT JOIN customer_first_purchase c
+    ON d.customer_id = c.customer_id
+),
+
+-- Calculate cohort index (months since first purchase)
+cohort_indexes AS (
+  SELECT 
+    *,
+    (invoice_year - cohort_year) * 12 + (invoice_month - cohort_month) + 1 AS cohort_index
+  FROM customer_purchase_per_cohort
 )
 
+-- Final output
 SELECT DISTINCT
-    CUSTOMER_ID,
-    COHORT_DATE,
-    COHORT_INDEX
-FROM COHORT_INDEXES
-ORDER BY COHORT_DATE, COHORT_INDEX, CUSTOMER_ID
+  customer_id,
+  cohort_date,
+  cohort_index
+FROM cohort_indexes
+ORDER BY cohort_date, cohort_index, customer_id
