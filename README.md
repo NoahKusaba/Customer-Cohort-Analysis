@@ -23,12 +23,15 @@ https://docs.getdbt.com/docs/core/installation-overview
 You will also need to create a new database and schema for this project to live in. The pictures in the Readme have it set to DB: "project_db" and schema "project_schema", but you can name it however you like
 
 To upload the csv file for this project run:
+
     dbt seed 
 
 To generate the final views of the model run the following command. Note that you will need to pass the paramater for the initial period start date: 
+
     dbt run --vars '{"initial_period_start": "2011-01-01"}'
 
 To query the customer cohort model on snowflake run:
+
     select * from PROJECT_DB.PROJECT_SCHEMA.CUSTOMER_COHORT order by cohort_date asc
 
 # Features
